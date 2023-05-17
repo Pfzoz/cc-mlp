@@ -3,217 +3,76 @@
 
 #include <vector>
 #include <cmath>
-#define doubleVMat std::vector<std::vector<double>>
+#include "matrix.hpp"
 
-doubleVMat relu(doubleVMat x)
+Matrix clip(Matrix x, int max, int min)
 {
-    for (int i = 0; i < x.size(); i++)
+    for (int i = 0; i < x.matrix_object.size(); i++)
     {
-        for (int j = 0; j < x[0].size(); j++)
+        for (int j = 0; j < x.matrix_object[0].size(); j++)
         {
-            if (x[i][j] <= 0)
-                x[i][j] = 0;
+            if (x.matrix_object[i][j] > max)
+            {
+                x.matrix_object[i][j] = max;
+            }
+            else if (x.matrix_object[i][j] < min)
+            {
+                x.matrix_object[i][j] = min;
+            }
         }
     }
     return x;
 }
 
-doubleVMat relu_prime(doubleVMat x)
+Matrix relu(Matrix x)
 {
-    for (int i = 0; i < x.size(); i++)
-    {
-        for (int j = 0; j < x[0].size(); j++)
-        {
-            if (x[i][j] <= 0)
-                x[i][j] = 0;
-            else
-                x[i][j] = 1;
-        }
-    }
-    return x;
+    return (x < 0) * x;
 }
 
-doubleVMat scalardot(doubleVMat x, double scalar)
+Matrix relu_prime(Matrix x)
 {
-    doubleVMat result(x.size(), std::vector<double>(x[0].size()));
-    for (int i = 0; i < x.size(); i++)
-    {
-        for (int j = 0; j < x[0].size(); j++)
-        {
-            result[i][j] = x[i][j]*scalar;
-        }
-    }
-    return result;
+    return (x > 0) * 1;
 }
 
-doubleVMat scalarsum(doubleVMat x, double scalar)
+long double matsummation(std::vector<Matrix> x)
 {
-    doubleVMat result(x.size(), std::vector<double>(x[0].size()));
+    long double accum = 0;
     for (int i = 0; i < x.size(); i++)
     {
-        for (int j = 0; j < x[0].size(); j++)
-        {
-            result[i][j] = x[i][j]+scalar;
-        }
-    }
-    return result;
-}
-
-doubleVMat scalardivide(doubleVMat x, double scalar)
-{
-    doubleVMat result(x.size(), std::vector<double>(x[0].size()));
-    for (int i = 0; i < x.size(); i++)
-    {
-        for (int j = 0; j < x[0].size(); j++)
-        {
-            result[i][j] = x[i][j]/scalar;
-        }
-    }
-    return result;
-}
-
-doubleVMat matsum(doubleVMat x, doubleVMat y)
-{
-    doubleVMat result(x.size(), std::vector<double>(x[0].size()));
-    for (int i = 0; i < x.size(); i++)
-    {
-        for (int j = 0; j < x[0].size(); j++)
-        {
-            result[i][j] = x[i][j]+y[i][j];
-        }
-    }
-    return result;
-}
-
-doubleVMat matdot(doubleVMat x, doubleVMat y)
-{
-    doubleVMat result(x.size(), std::vector<double>(x[0].size()));
-    for (int i = 0; i < x.size(); i++)
-    {
-        for (int j = 0; j < x[0].size(); j++)
-        {
-            result[i][j] = x[i][j]*y[i][j];
-        }
-    }
-    return result;
-}
-
-doubleVMat transpose(doubleVMat x)
-{
-    doubleVMat result(x[0].size(), std::vector<double>(x.size()));
-    for (int i = 0; i < x.size(); i++)
-    {
-        for (int j = 0; j < x[0].size(); j++)
-        {
-            result[j][i] = x[i][j];
-        }
-    }
-    return result;
-}
-
-doubleVMat matmul(doubleVMat x, doubleVMat y)
-{
-    if (x[0].size() == y.size())
-    {
-        doubleVMat result(x.size(), std::vector<double>(y[0].size()));
-        doubleVMat y_tranpose = transpose(y);
-        for (int i = 0; i < x.size(); i++)
-        {
-            for (int j = 0; j < y[0].size(); j++)
-            {
-                double accum = 0;
-                for (int k = 0; k < y_tranpose[0].size(); k++)
-                {
-                    accum += x[i][k]*y_tranpose[j][k];
-                }
-                result[i][j] = accum;
-            }
-        }
-        return result;
-    }
-    else 
-    {
-        std::cout << "Matmul error: Shapes conflict.\n";
-        exit(1);
-    }
-}
-
-double matsummation(std::vector<doubleVMat> x)
-{
-    double accum = 0;
-    for (int i = 0; i < x.size(); i++)
-    {
-        for (int j = 0; j < x[i].size(); j++)
-        {
-            for (int k = 0; k < x[i][0].size(); k++)
-            {
-                accum += x[i][j][k];
-            }
-        }
+        accum += x[i].sum();
     }
     return accum;
 }
 
-doubleVMat mean_squared_error_prime(doubleVMat estimated_y, doubleVMat y)
+Matrix mean_squared_error_prime(Matrix estimated_y, Matrix y)
 {
-    return scalardivide(scalardot(matsum(y, scalardot(estimated_y, -1)), -2), estimated_y.size());
+    return ((y - estimated_y) * -2) / (estimated_y.matrix_object.size() * estimated_y.matrix_object[0].size());
 }
 
-double matmean(doubleVMat x)
+long double mean_squared_error(Matrix estimated_y, Matrix y)
 {
-    double accum = 0;
-    double size = 0;
-    for (int i = 0; i < x.size(); i++)
+    return ((estimated_y - y).pow(2)).mean();
+}
+
+Matrix sigmoid(Matrix x)
+{
+    x = clip(x, 30, -30);
+
+    for (int i = 0; i < x.matrix_object.size(); i++)
     {
-        for (int j = 0; j < x[0].size(); j++)
+        for (int j = 0; j < x.matrix_object[0].size(); j++)
         {
-            accum += x[i][j];
-            size += 1;
+            x.matrix_object[i][j] = 1.0 / (1.0 + (pow(exp(1.0), x.matrix_object[i][j])));
         }
     }
-    return accum/size;
-}
 
-doubleVMat scalarpower(doubleVMat x, double y)
-{
-    doubleVMat result(x.size(), std::vector<double>(x[0].size()));
-    for (int i = 0; i < x.size(); i++)
-    {
-        for (int j = 0; j < x[0].size(); j++)
-        {
-            result[i][j] = pow(x[i][j], y);
-        }
-    }
-    return result;
-}
-
-double mean_squared_error(doubleVMat estimated_y, doubleVMat y)
-{
-    return matmean(scalarpower(matsum(estimated_y, scalardot(y, -1)), 2));
-}
-
-doubleVMat sigmoid(doubleVMat x)
-{
-    for (int i = 0; i < x.size(); i++)
-    {
-        for (int j = 0; j < x[0].size(); j++)
-        {
-            x[i][j] = 1/(1+(pow(exp(1.0), x[i][j])));
-        }
-    }
     return x;
 }
 
-doubleVMat sigmoid_prime(doubleVMat x)
+Matrix sigmoid_prime(Matrix x)
 {
-    for (int i = 0; i < x.size(); i++)
-    {
-        for (int j = 0; j < x[0].size(); j++)
-        {
-            x[i][j] = x[i][j]*(1-x[i][j]);
-        }
-    }
-    return x;
+    x = clip(x, 30, -30);
+    return x * ((x * -1) + 1);
 }
 
 #endif

@@ -5,7 +5,7 @@
 #include <vector>
 #include <random>
 #include <chrono>
-#include "calculations.hpp"
+#include "matrix.hpp"
 
 #define doubleVMat std::vector<std::vector<double>>
 
@@ -13,15 +13,15 @@ class Layer
 {
 public:
     // properties
-    doubleVMat (*activation_function)(doubleVMat);
-    doubleVMat (*activation_prime)(doubleVMat);
+    Matrix (*activation_function)(Matrix);
+    Matrix (*activation_prime)(Matrix);
     int neurons;
     // constructors
     Layer(){};
     ~Layer(){};
 
     // methods
-    Layer(int neurons, doubleVMat (*activation_function)(doubleVMat), doubleVMat (*activation_prime)(doubleVMat))
+    Layer(int neurons, Matrix (*activation_function)(Matrix), Matrix (*activation_prime)(Matrix))
     {
         this->activation_function = activation_function;
         this->activation_prime = activation_prime;
@@ -33,51 +33,32 @@ public:
         this->neurons = neurons;
     }
 
-    doubleVMat compile_weights(Layer __o)
+    Matrix compile_weights(Layer __o)
     {
         int rows = __o.neurons, columns = this->neurons;
         unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
         std::default_random_engine generator(seed);
-        std::normal_distribution<double> distribution(0.0, 1.0);
-        std::vector<double> column(columns, 0);
-        std::vector<std::vector<double>> w(rows, column);
+        std::normal_distribution<long double> distribution(0.0, 1.0);
+        Matrix weights(rows, columns);
         for (int i = 0; i < rows; i++)
         {
             for (int j = 0; j < columns; j++)
             {
-                w[i][j] = distribution(generator);
+                weights.set(i, j, distribution(generator));
             }
         }
-        return w;
+        return weights;
     }
 
-    doubleVMat compile_activations()
+    Matrix compile_activations()
     {
-        std::vector<double> single_row(1);
-        doubleVMat activations(this->neurons, single_row);
-        return activations;
+        return Matrix(this->neurons, 1);
     }
 
-    doubleVMat compile_biases()
+    Matrix compile_biases()
     {
-        std::vector<double> single_row(1, 0);
-        doubleVMat biases(this->neurons, single_row);
-        return biases;
+        return Matrix(this->neurons, 1);
     }
 };
-
-void print_matrix(doubleVMat x)
-{
-    std::cout << '[' << ' ';
-    for (int i = 0; i < x.size(); i++)
-    {  
-        for (int j = 0; j < x[0].size(); j++)
-        {
-            std::cout << x[i][j] << ' ';
-        }
-        std::cout <<'\n';
-    }
-    std::cout << " ]";
-}
 
 #endif
