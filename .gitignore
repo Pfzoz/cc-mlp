@@ -1,0 +1,4 @@
+*.out
+*.x
+src/*.x
+src/*.out
