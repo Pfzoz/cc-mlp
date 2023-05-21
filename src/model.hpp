@@ -45,8 +45,7 @@ public:
     {
         Matrix loss_derivative = this->loss_prime(y, this->activations[this->activations.size()-1]);
         long double reg = this->weight_matrixes[this->weight_matrixes.size()-1].sum()*this->regularization_term;
-        // std::cout << "REG:" << reg << ";\n";
-        Matrix cost = loss_derivative+reg;
+        Matrix cost = loss_derivative+reg;        
         Matrix delta = cost*this->activation_primes[this->activation_primes.size()-1](this->activations[this->activations.size()-1]);
         for (int i = this->weight_matrixes.size() - 1; i > -1; i--)
         {
@@ -106,6 +105,7 @@ public:
         Model model;
         model.loss_metric = this->loss_metric;
         model.loss_prime = this->loss_prime;
+        model.regularization_term = this->regularization_term;
         for (int i = 0; i < this->layers.size(); i++)
         {
             model.activations.push_back(this->layers[i].compile_activations());

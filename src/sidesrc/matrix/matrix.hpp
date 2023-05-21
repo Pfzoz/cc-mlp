@@ -163,6 +163,32 @@ public:
         }
         return minimum;
     }
+
+    long double max()
+    {
+        long double maximum = this->col_max(0);
+        for (int i = 1; i < this->cols(); i++)
+        {
+            if (maximum < this->col_max(i))
+            {
+                maximum = this->col_max(i);
+            }
+        }
+        return maximum;
+    }
+
+    long double min()
+    {
+        long double minimum = this->col_min(0);
+        for (int i = 1; i < this->cols(); i++)
+        {
+            if (minimum > this->col_min(i))
+            {
+                minimum = this->col_min(i);
+            }
+        }
+        return minimum;
+    }
 };
 
 // Logic Operations
@@ -465,11 +491,12 @@ long double Matrix::mean()
 
 // Matrix-Wise Functions
 
-Matrix mat_normalize_cols(Matrix matrix)
+Matrix mat_normalize(Matrix matrix)
 {
+    long double min = matrix.min(), max = matrix.max();
+    std::cout << "MAX: " << max << " MIN: " << min << '\n'; 
     for (int i = 0; i < matrix.cols(); i++)
     {
-        long double min = matrix.col_min(i), max = matrix.col_max(i);
         for (int j = 0; j < matrix.rows(); j++)
         {
             long double new_value = (matrix.get(j, i)-min)/(max-min);

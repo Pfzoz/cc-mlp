@@ -24,31 +24,31 @@ int main()
     std::srand(std::time(0));
     // Data
     Matrix data = matrix_from_csv("/home/pedrozoz/repositories/cc-repo/cc-dummy/cc-mlp/src/iris.data");
-    std::cout << "Normalized Data:\n";
-    data = mat_normalize_cols(data);
-    data.show();
     data = mat_shuffle_row(data);
-    Matrix test_data;
-    for (int i = 0; i < data.rows() / 5; i++)
+    Matrix x_data = mat_normalize(data.col_split(0, 4));
+    Matrix y_data =  mat_normalize(data.col_split(4, 5));
+    Matrix x_data_test, y_data_test;
+    for (int i = 0; i < data.rows() / 4; i++)
     {
-        test_data.matrix_object.push_back(data.get_row(data.rows()-1));
-        data.matrix_object.pop_back();
+        x_data_test.matrix_object.push_back(x_data.get_row(x_data.rows()-1));
+        x_data.matrix_object.pop_back();
     }
-    std::cout << "Train Data:\n";
-    data.show();
-    std::cout << "Test Data:\n";
-    test_data.show();
+    for (int i = 0; i < data.rows() / 4; i++)
+    {
+        y_data_test.matrix_object.push_back(y_data.get_row(y_data.rows()-1));
+        y_data.matrix_object.pop_back();
+    }
+    // std::cout << "Train Data:\n";
+    // data.show();
+    // std::cout << "Test Data:\n";
+    // test_data.show();
     // Model
-    MLP myMLP(&mean_squared_error, &mean_squared_error_prime, 0.0L);
+    MLP myMLP(&mean_squared_error, &mean_squared_error_prime, 0.0);
     myMLP.push_layer(Layer(4, &sigmoid, &sigmoid_prime));
     myMLP.push_layer(Layer(4, &sigmoid, &sigmoid_prime));
     myMLP.push_layer(Layer(1, &sigmoid, &sigmoid_prime));
     auto model = myMLP.compile();
     // Training
-    Matrix x_data = data.col_split(0, 4);
-    Matrix y_data = data.col_split(4, 5);
-    Matrix x_data_test = test_data.col_split(0, 4);
-    Matrix y_data_test = test_data.col_split(4, 5);
     std::vector<Matrix> x;
     std::vector<Matrix> y;
     std::vector<Matrix> x_test;
