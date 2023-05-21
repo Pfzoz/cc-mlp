@@ -51,8 +51,6 @@ int main()
     // Training
     std::vector<Matrix> x;
     std::vector<Matrix> y;
-    std::vector<Matrix> x_test;
-    std::vector<Matrix> y_test;
     for (int i = 0; i < x_data.rows(); i++)
     {
         Matrix x_mat = Matrix(4, 1);

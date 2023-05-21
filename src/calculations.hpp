@@ -51,7 +51,7 @@ Matrix mean_squared_error_prime(Matrix estimated_y, Matrix y)
 
 long double mean_squared_error(Matrix estimated_y, Matrix y)
 {
-    return ((estimated_y - y).pow(2)).mean();
+    return ((y - estimated_y).pow(2)).mean();
 }
 
 Matrix sigmoid(Matrix x)
@@ -62,7 +62,7 @@ Matrix sigmoid(Matrix x)
     {
         for (int j = 0; j < x.matrix_object[0].size(); j++)
         {
-            x.matrix_object[i][j] = 1.0 / (1.0 + (pow(exp(1.0), x.matrix_object[i][j])));
+            x.matrix_object[i][j] = 1.0 / (1.0 + (pow(exp(1.0), -x.matrix_object[i][j])));
         }
     }
 

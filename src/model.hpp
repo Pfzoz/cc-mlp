@@ -43,7 +43,7 @@ public:
 
     void back_propagate(Matrix y, long double learning_rate)
     {
-        Matrix loss_derivative = this->loss_prime(y, this->activations[this->activations.size()-1]);
+        Matrix loss_derivative = this->loss_prime(this->activations[this->activations.size()-1], y);
         long double reg = this->weight_matrixes[this->weight_matrixes.size()-1].sum()*this->regularization_term;
         Matrix cost = loss_derivative+reg;        
         Matrix delta = cost*this->activation_primes[this->activation_primes.size()-1](this->activations[this->activations.size()-1]);
