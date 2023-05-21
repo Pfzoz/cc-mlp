@@ -21,6 +21,14 @@ public:
     {
         this->matrix_object = _generate_matrix(rows, cols, default_value);
     }
+    Matrix(std::vector<long double> row)
+    {
+        this->matrix_object = _generate_matrix(1, row.size(), 0);
+        for (int i = 0; i < row.size(); i++)
+        {
+            this->set(0, i, row[i]);
+        }
+    }
 
     // Logic Operations
     Matrix operator<(long double __o);
@@ -494,7 +502,6 @@ long double Matrix::mean()
 Matrix mat_normalize(Matrix matrix)
 {
     long double min = matrix.min(), max = matrix.max();
-    std::cout << "MAX: " << max << " MIN: " << min << '\n'; 
     for (int i = 0; i < matrix.cols(); i++)
     {
         for (int j = 0; j < matrix.rows(); j++)
@@ -504,6 +511,19 @@ Matrix mat_normalize(Matrix matrix)
         }
     }
     return matrix;
+}
+
+Matrix mat_shuffle_row(Matrix matrix)
+{
+    Matrix result;
+    int original_size = matrix.rows();
+    while (result.rows() != original_size)
+    {
+        int choice = std::rand() % matrix.rows();
+        result.matrix_object.push_back(matrix.get_row(choice));
+        matrix.matrix_object.erase(matrix.matrix_object.begin() + choice);
+    }
+    return result;
 }
 
 #endif
